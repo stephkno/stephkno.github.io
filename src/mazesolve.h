@@ -26,7 +26,6 @@
             "╬","╣","╩","╝","╠","║","╚","↓",
             "╦","╗","═","→","╔","↑","←","▒"
         };
-
         string thinMazewalls[16] = {
             "┼","┤","┴","┘","├","│","└","↓",
             "┬","┐","─","→","┌","↑","←","▒"
@@ -205,11 +204,11 @@
                     }
                     else if(visited[i])
                     {
-                        os << thinMazewalls[mazeSet[i]];
+                        os << mazeWalls[mazeSet[i]];
                     }
                     else
                     {
-                        os << mazeWalls[mazeSet[i]];
+                        os << thinMazewalls[mazeSet[i]];
                     }
                     i++;
 

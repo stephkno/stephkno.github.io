@@ -258,7 +258,7 @@ string MazeGenerator::toString()
             }
             else
             {
-                os << mazeWalls[mazeSet[i]];
+                os << thinMazewalls[mazeSet[i]];
             }
             i++;
 
