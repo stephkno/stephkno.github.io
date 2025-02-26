@@ -93,6 +93,10 @@
         {
             return exit;
         }
+        uint GetEntry()
+        {
+            return entry;
+        }
 
         // return string representaion of maze
         string toString();

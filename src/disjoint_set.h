@@ -125,11 +125,11 @@
         
         }
         
+        // get number of subsets in disjoint set
         uint NumSets() const
         {
             return n_sets;
         }
-        
 
         // merge two sets
         bool Union(uint subset1, uint subset2)
@@ -151,17 +151,20 @@
                 return false;
             }
 
-            if(subsetNode1->rank > subsetNode2->rank)
+            // if root1 outranks root2, connect root1 to root2's parent
+            if((root1->rank) > (root2->rank))
             {
-                FindRoot(subsetNode2)->parent = subsetNode1->parent;
+                root2->parent = root1;
+            }
+            else if((root1->rank) < (root2->rank))
+            {
+                root1->parent = root2;
             }
             else
             {
-                FindRoot(subsetNode1)->parent = subsetNode2->parent;
+                root2->parent = root1;
+                root1->rank++;
             }
-
-            subsetNode1->rank += subsetNode2->rank;
-            subsetNode2->rank += subsetNode1->rank;
 
             n_sets--;
 
@@ -198,5 +201,5 @@
         }
 
     };
-    
+
 #endif

@@ -2,6 +2,26 @@
 
 //#define DEBUG
 
+MazeGenerator::MazeGenerator() : width(0), height(0)
+{
+    //std::srand( ( unsigned int )std::time( nullptr ) );
+}
+
+MazeGenerator::MazeGenerator(uint width, uint height) : width(width), height(height) 
+{
+    Initialize(width, height);
+}
+
+MazeGenerator::~MazeGenerator()
+{
+
+}
+
+bool MazeGenerator::MazeComplete()
+{
+    return mazeSet.NumSets() == 1;
+}
+
 int MazeGenerator::getNeighbor(uint room, Direction direction)
 {
 
@@ -54,26 +74,6 @@ bool MazeGenerator::RemoveWall(uint room, uint neighbor, Direction direction, Di
 
     return true;
 
-}
-
-MazeGenerator::MazeGenerator() : width(0), height(0)
-{
-    //std::srand( ( unsigned int )std::time( nullptr ) );
-}
-
-MazeGenerator::MazeGenerator(uint width, uint height) : width(width), height(height) 
-{
-    Initialize(width, height);
-}
-
-MazeGenerator::~MazeGenerator()
-{
-
-}
-
-bool MazeGenerator::MazeComplete()
-{
-    return mazeSet.NumSets() == 1;
 }
 
 void MazeGenerator::Initialize(uint width, uint height)
@@ -234,6 +234,18 @@ void MazeGenerator::GenerateStep()
             mazeSet[room] != 11 && 
             mazeSet[room] != 13 && 
             mazeSet[room] != 14));
+
+        // randomly place entrance over a dead end room
+        do{
+
+            room = random(1, width*height);
+            entry = room;
+
+        }while(room == 0 || 
+            (mazeSet[room] != 7 && 
+            mazeSet[room] != 11 && 
+            mazeSet[room] != 13 && 
+            mazeSet[room] != 14));
     }
 
     return;
@@ -245,7 +257,7 @@ string MazeGenerator::toString()
     stringstream os;
 
     uint i = 0;
-    
+
     for(uint y = 0; y < height; y++)
     {
         

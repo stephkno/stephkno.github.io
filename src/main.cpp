@@ -109,7 +109,7 @@ void loop()
             // initialize maze solve
             cout << "Begin solving maze" << endl;
             start_time = GetTimestamp();
-            mazeSolve.SetMaze(mazeGen.GetSet(), width, height, mazeGen.GetExit());
+            mazeSolve.SetMaze(mazeGen.GetSet(), width, height, mazeGen.GetEntry(), mazeGen.GetExit());
             state = SOLVE;
 
             break;
@@ -133,7 +133,7 @@ void loop()
             cout << "Done solving maze" << endl;
             cout << "Time: " << GetTimestamp() - start_time << " seconds." << endl;
             
-            state = HALT;
+            state = INIT_GENERATION;
             break;
 
         }

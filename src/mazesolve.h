@@ -10,21 +10,19 @@
     class MazeSolver{
 
         DisjointSet<uint> mazeSet;
+        Queue_<int> room_queue;
         vector<bool> visited;
 
         uint width, height;
         uint entry, exit;
 
         uint current_room = 0;
-        uint x, y = 0;
         bool solved = false;
-
-        Queue_<int> room_queue;
 
         // char representation of maze rooms
         string mazeWalls[16] = {
-            "╬","╣","╩","╝","╠","║","╚","↓",
-            "╦","╗","═","→","╔","↑","←","▒"
+            "╬","╣","╩","╝","╠","║","╚","x",
+            "╦","╗","═","x","╔","x","x","▒"
         };
         string thinMazewalls[16] = {
             "┼","┤","┴","┘","├","│","└","↓",
@@ -80,13 +78,13 @@
 
         }
 
-        void SetMaze(DisjointSet<uint> & mazeSet, uint width, uint height, uint exit)
+        void SetMaze(DisjointSet<uint> & mazeSet, uint width, uint height, uint entry, uint exit)
         {
 
             this->mazeSet = DisjointSet<uint>(mazeSet);
             this->width = width;
             this->height = height;
-            this->entry = 0;
+            this->entry = entry;
             this->exit = exit;
 
             room_queue.Enqueue((int)this->entry);
@@ -196,11 +194,11 @@
                     }
                     else if(i == entry)
                     {
-                        os << "S";
+                        os << "<b class=\"blink\">S</b>";
                     }
                     else if(i == exit)
                     {
-                        os << "E";
+                        os << "<b class=\"blink\">E</b>";
                     }
                     else if(visited[i])
                     {
