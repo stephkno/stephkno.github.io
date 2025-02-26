@@ -73,7 +73,7 @@ void loop()
         case(INIT_GENERATION):
         {
 
-            cout << "Begin generating maze" << endl;
+            cout << "Begin generating " << width << "x" << height << " maze" << endl;
             start_time = GetTimestamp();
             mazeGen.Initialize(width, height);
             state = GENERATE;
@@ -107,7 +107,7 @@ void loop()
         {
 
             // initialize maze solve
-            cout << "Begin solving maze" << endl;
+            cout << "Begin solving maze via BFS" << endl;
             start_time = GetTimestamp();
             mazeSolve.SetMaze(mazeGen.GetSet(), width, height, mazeGen.GetEntry(), mazeGen.GetExit());
             state = SOLVE;
@@ -133,7 +133,7 @@ void loop()
             cout << "Done solving maze" << endl;
             cout << "Time: " << GetTimestamp() - start_time << " seconds." << endl;
             
-            state = INIT_GENERATION;
+            state = HALT;
             break;
 
         }
