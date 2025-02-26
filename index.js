@@ -1707,8 +1707,8 @@ var tempI64;
 // === Body ===
 
 var ASM_CONSTS = {
-  25280: function($0) {var div = document.getElementById('textdiv'); if (div) { div.innerHTML = UTF8ToString($0); }},  
- 25377: function($0) {alert(UTF8ToString($0));}
+  25312: function($0) {var div = document.getElementById('textdiv'); if (div) { div.innerHTML = UTF8ToString($0); }},  
+ 25409: function($0) {alert(UTF8ToString($0));}
 };
 
 

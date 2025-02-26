@@ -254,7 +254,7 @@ string MazeGenerator::toString()
 
             if(i == room_cursor)
             {
-                os << "☺";
+                os << "<b class=\"blink\">☺</b>";
             }
             else
             {

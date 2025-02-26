@@ -193,7 +193,7 @@
 
                     if(i == current_room)
                     {
-                        os << "☺";
+                        os << "<b class=\"blink\">☺</b>";
                     }
                     else if(i == entry)
                     {
