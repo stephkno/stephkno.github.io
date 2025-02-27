@@ -27,7 +27,6 @@ MazeDriverState state;
 bool pause = false;
 uint start_time = 0;
 
-// why can maze solver not handle ONLY being exactly 8x8?
 uint width = 64;
 uint height = 32;
 
