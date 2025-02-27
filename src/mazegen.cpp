@@ -1,6 +1,5 @@
 #include "mazegen.h"
-
-//#define DEBUG
+#include "js.h"
 
 MazeGenerator::MazeGenerator() : width(0), height(0)
 {
@@ -94,7 +93,7 @@ void MazeGenerator::Initialize(uint width, uint height)
 
     this->initialized = true;
     
-    // shuffle spaces to visit if in random mode
+    // shuffle spaces to visit if in js_random mode
     if(random_order)
     {
         auto rng = default_random_engine{};
@@ -135,7 +134,7 @@ void MazeGenerator::GenerateStep()
         auto room = rooms_unvisited.back();
         room_cursor = room;
         
-        int r = random(0,3);
+        int r = js_random(0,3);
         Direction direction = Direction( pow( 2, r ) );
         
         // get neighboring room
@@ -226,7 +225,7 @@ void MazeGenerator::GenerateStep()
 
         do{
 
-            room = random(1, width*height);
+            room = js_random(1, width*height);
             exit = room;
 
         }while(room == 0 || 
@@ -238,7 +237,7 @@ void MazeGenerator::GenerateStep()
         // randomly place entrance over a dead end room
         do{
 
-            room = random(1, width*height);
+            room = js_random(1, width*height);
             entry = room;
 
         }while(room == 0 || 
@@ -266,7 +265,7 @@ string MazeGenerator::toString()
 
             if(i == room_cursor)
             {
-                os << "<b class=\"blink\">☺</b>";
+                os << "<a class=\"blink\">☻</a>";
             }
             else
             {

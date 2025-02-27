@@ -1,5 +1,6 @@
 #ifndef QUEUE_H
 #define QUEUE_H
+#define uint unsigned int
 
     #include <vector>
 

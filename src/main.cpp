@@ -6,7 +6,7 @@
 
 #include "js.h"
 #include "mazegen.h"
-#include "mazesolve.h"
+#include "mazesolver.h"
 
 using namespace std;
 
@@ -113,6 +113,7 @@ void loop()
             state = SOLVE;
 
             break;
+            
         }
         case(SOLVE):
         {
@@ -130,7 +131,7 @@ void loop()
 
             }
 
-            cout << "Done solving maze" << endl;
+            cout << "Solved maze with " << mazeSolve.RoomsVisited() << " steps." << endl;
             cout << "Time: " << GetTimestamp() - start_time << " seconds." << endl;
             
             state = HALT;
