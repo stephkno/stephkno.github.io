@@ -18,6 +18,7 @@
         uint entry, exit;
 
         uint current_room = 0;
+        uint n_steps = 0;
         bool solved = false;
 
         // char representation of maze rooms

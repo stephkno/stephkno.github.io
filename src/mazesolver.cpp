@@ -46,6 +46,8 @@ void MazeSolver::SetMaze(DisjointSet<uint> & mazeSet, uint width, uint height, u
     this->height = height;
     this->entry = entry;
     this->exit = exit;
+    this->current_room = this->entry;
+    this->n_steps = 0;
 
     room_queue.Enqueue((int)this->entry);
 
@@ -71,6 +73,7 @@ bool MazeSolver::SolveStep()
     }
 
     visited[current_room] = true;
+    n_steps++;
 
     int n = -1;
     uint room = mazeSet[current_room];
@@ -137,7 +140,7 @@ bool MazeSolver::MazeComplete()
 
 uint MazeSolver::RoomsVisited()
 {
-    return visited.size();
+    return n_steps;
 }
 
 string MazeSolver::toString()
