@@ -15,7 +15,8 @@ all:
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s EXIT_RUNTIME \
 	-s NO_DISABLE_EXCEPTION_CATCHING \
-	--shell-file template/index.html
+	--shell-file template/index.html \
+	--profiling
 
 run:
 	emrun --no_browser --port 8080 .

@@ -239,9 +239,10 @@ void MazeGenerator::GenerateStep()
 
             room = js_random(1, width*height);
             entry = room;
-
+            
         }while(room == 0 || 
-            (mazeSet[room] != 7 && 
+            (room != exit && 
+            mazeSet[room] != 7 && 
             mazeSet[room] != 11 && 
             mazeSet[room] != 13 && 
             mazeSet[room] != 14));

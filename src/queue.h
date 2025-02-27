@@ -3,6 +3,7 @@
 #define uint unsigned int
 
     #include <vector>
+    #include <iostream>
 
     using namespace std;
 
@@ -28,9 +29,16 @@
         }
         
         T Dequeue(){
+            
+            if (queue.empty())
+            {
+                throw out_of_range("Queue is empty");
+            }
+
             T item = queue[0];
             queue.erase(queue.begin());
             return item;
+        
         }
 
         void Clear(){

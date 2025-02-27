@@ -1707,9 +1707,9 @@ var tempI64;
 // === Body ===
 
 var ASM_CONSTS = {
-  25312: function($0) {var div = document.getElementById('textdiv'); if (div) { div.innerHTML = UTF8ToString($0); }},  
- 25409: function($0) {alert(UTF8ToString($0));},  
- 25438: function($0, $1) {return Math.floor( $0 + (Math.random() * ($1-$0) ) );}
+  25376: function($0) {var div = document.getElementById('textdiv'); if (div) { div.innerHTML = UTF8ToString($0); }},  
+ 25473: function($0) {alert(UTF8ToString($0));},  
+ 25502: function($0, $1) {return Math.floor( $0 + (Math.random() * ($1-$0) ) );}
 };
 
 

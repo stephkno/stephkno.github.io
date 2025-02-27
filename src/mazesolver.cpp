@@ -49,34 +49,53 @@ void MazeSolver::SetMaze(DisjointSet<uint> & mazeSet, uint width, uint height, u
     this->current_room = this->entry;
     this->n_steps = 0;
 
-    room_queue.Enqueue((int)this->entry);
+    room_queue.Enqueue(this->entry);
 
     for(int i = 0; i < width*height; i++){
         visited.push_back(false);
     }
+    for(int i = 0; i < width*height; i++){
+        parents.push_back(-1);
+    }
 
 }
 
-bool MazeSolver::SolveStep()
+void MazeSolver::SolveStep()
 {
-    if(room_queue.Length() == 0)
+    #ifdef DEBUG
+        cout << "Step" << endl;
+    #endif
+
+    // backtrack after maze has been solved to find path
+    if(solved)
     {
-        return false;
+        if(current_room != entry){
+            current_room = parents[current_room];
+            path.push_back(current_room);
+        }else{
+            pathed = true;
+        }
+        return;
     }
 
     current_room = room_queue.Dequeue();
-    
+
+    #ifdef DEBUG
+        cout << "Currently in room: " << current_room << endl;
+    #endif
+
     if(current_room == exit){
         solved = true;
         room_queue.Clear();
-        return false;
+        return;
     }
 
     visited[current_room] = true;
+
     n_steps++;
 
     int n = -1;
-    uint room = mazeSet[current_room];
+    int room = mazeSet[current_room];
     
     #ifdef DEBUG
         cout << "Room: " << current_room << " " << room << endl;
@@ -85,7 +104,7 @@ bool MazeSolver::SolveStep()
         cout << "L: " << std::bitset<8>(~room) << " " << std::bitset<8>(LEFT) << endl;
         cout << "D: " << std::bitset<8>(~room) << " " << std::bitset<8>(DOWN) << endl;
     #endif
-    
+
     // RIGHT
     if((~room & RIGHT))
     {
@@ -93,7 +112,8 @@ bool MazeSolver::SolveStep()
         
         if(n>=0 && !visited[n])
         {
-            room_queue.Enqueue(n);
+            room_queue.Enqueue(static_cast<uint>(n));
+            parents[n] = current_room;
         }
     }
     
@@ -104,10 +124,11 @@ bool MazeSolver::SolveStep()
 
         if(n>=0 && !visited[n])
         {
-            room_queue.Enqueue(n);
+            room_queue.Enqueue(static_cast<uint>(n));
+            parents[n] = current_room;
         }
     }
-
+    
     // LEFT
     if((~room & LEFT))
     {
@@ -115,7 +136,8 @@ bool MazeSolver::SolveStep()
 
         if(n>=0 && !visited[n])
         {
-            room_queue.Enqueue(n);
+            room_queue.Enqueue(static_cast<uint>(n));
+            parents[n] = current_room;
         }
     }
 
@@ -124,18 +146,20 @@ bool MazeSolver::SolveStep()
     {
         n = getNeighbor(current_room, DOWN);
 
-        if(n>=0 && !visited[n]){
-            room_queue.Enqueue(n);
+        if(n>=0 && !visited[n])
+        {
+            room_queue.Enqueue(static_cast<uint>(n));
+            parents[n] = current_room;
         }
     }
 
-    return true;
+    return;
 
 }
 
 bool MazeSolver::MazeComplete()
 {
-    return room_queue.Length() == 0;
+    return solved && pathed;
 }
 
 uint MazeSolver::RoomsVisited()
@@ -157,7 +181,7 @@ string MazeSolver::toString()
 
             if(i == current_room)
             {
-                os << "<b class=\"blink\">☺</b>";
+                os << "<b class=\"blink\">☻</b>";
             }
             else if(i == entry)
             {
@@ -167,13 +191,16 @@ string MazeSolver::toString()
             {
                 os << "<b class=\"blink\">E</b>";
             }
-            else if(visited[i])
+            else if(!visited[i])
             {
+                os << thinMazewalls[mazeSet[i]];
+            }
+            else if(find(path.begin(), path.end(), i) != path.end()){
                 os << mazeWalls[mazeSet[i]];
             }
             else
             {
-                os << thinMazewalls[mazeSet[i]];
+                os << thickMazewalls[mazeSet[i]];
             }
             i++;
 
