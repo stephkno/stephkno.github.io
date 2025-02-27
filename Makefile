@@ -15,7 +15,6 @@ all:
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s EXIT_RUNTIME \
 	-s NO_DISABLE_EXCEPTION_CATCHING \
-	-Oz \
 	--shell-file template/index.html
 
 run:
