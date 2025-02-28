@@ -75,8 +75,8 @@ void loop()
 
         case(INIT_GENERATION):
         {
-            width = js_random(2,25);
-            height = js_random(2,25);
+            width = js_random(10,64);
+            height = js_random(10,64);
          
             cout << maze_count++ << ": Begin generating " << width << "x" << height << " maze" << endl;
             
