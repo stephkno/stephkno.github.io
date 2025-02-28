@@ -2,8 +2,8 @@
 #define MAZESOLVE_H
 
     #include <string>
-    #include <unordered_map>
     #include <sstream>
+    #include <algorithm>
 
     #include "queue.h"
     #include "disjoint_set.h"

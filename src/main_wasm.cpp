@@ -4,6 +4,7 @@
 #include <iostream>
 #include <chrono>
 
+#include "js.h"
 #include "mazegen.h"
 #include "mazesolver.h"
 
@@ -28,7 +29,27 @@ uint start_time = 0;
 
 uint width = 32;
 uint height = 32;
-uint maze_count = 0;
+
+uint maze_count = 1;
+
+EM_BOOL keyDownCallback(int eventType, const EmscriptenKeyboardEvent *keyEvent, void *userData) 
+{
+    
+    if(keyEvent->key[0] == ' ')
+    {
+        
+        pause = !pause;
+
+        if(pause){
+            cout << "Paused" << endl;
+        }else{
+            cout << "Unpaused" << endl;
+        }
+
+    }
+	return false;
+
+}
 
 uint GetTimestamp()
 {
@@ -38,11 +59,6 @@ uint GetTimestamp()
         p1.time_since_epoch()
     ).count();
 
-}
-
-void PutString(string s)
-{
-    cout << s << endl;
 }
 
 // maze driver main loop
@@ -59,8 +75,10 @@ void loop()
 
         case(INIT_GENERATION):
         {
-            maze_count++;
-            cout << maze_count << ": Begin generating " << width << "x" << height << " maze" << endl;
+            width = js_random(2,25);
+            height = js_random(2,25);
+         
+            cout << maze_count++ << ": Begin generating " << width << "x" << height << " maze" << endl;
             
             start_time = GetTimestamp();
             mazeGen.Initialize(width, height);
@@ -73,7 +91,6 @@ void loop()
         
             if(!mazeGen.MazeComplete())
             {
-                cout << maze_count << endl;
                 
                 // run single maze generation cycle
                 mazeGen.GenerateStep();
@@ -96,7 +113,7 @@ void loop()
         {
 
             // initialize maze solve
-            cout <<  maze_count << "Begin solving maze via BFS" << endl;
+            cout << "Begin solving maze via BFS" << endl;
             start_time = GetTimestamp();
             mazeSolve.SetMaze(mazeGen.GetSet(), width, height, mazeGen.GetEntry(), mazeGen.GetExit());
             state = SOLVE;
@@ -109,8 +126,7 @@ void loop()
 
             if(!mazeSolve.MazeComplete())
             {
-                cout << maze_count << endl;
-
+                
                 // run single maze solving cycle
                 mazeSolve.SolveStep();
 
@@ -123,8 +139,11 @@ void loop()
 
             cout << "Solved maze with " << mazeSolve.RoomsVisited() << " steps." << endl;
             cout << "Time: " << GetTimestamp() - start_time << " seconds." << endl;
+
+            state = INIT_GENERATION;
             
-            state = HALT;
+            cout << "Generating new maze in 3 seconds..." << endl;
+            emscripten_sleep(3000);
 
             break;
 
@@ -137,8 +156,7 @@ void loop()
         }
         default:
         {
-            
-            state = HALT;
+        
             break;
         
         }
@@ -150,9 +168,8 @@ void loop()
 int main()
 {
 
-    while(true){
-        loop();
-    }
+    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, true, keyDownCallback);
+    emscripten_set_main_loop(loop, 0, false);
 	return 0;
 
 }

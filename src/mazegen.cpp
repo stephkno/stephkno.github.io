@@ -1,5 +1,8 @@
 #include "mazegen.h"
-#include "js.h"
+
+#ifdef WASM
+    #include "js.h"
+#endif
 
 MazeGenerator::MazeGenerator() : width(0), height(0)
 {
@@ -82,6 +85,8 @@ void MazeGenerator::Initialize(uint width, uint height)
     this->height = height;
 
     rooms_unvisited.clear();
+    mazeSet.clear();
+
     uint n = width * height;
 
     for(uint i = 0; i < n; i++)
@@ -134,7 +139,11 @@ void MazeGenerator::GenerateStep()
         auto room = rooms_unvisited.back();
         room_cursor = room;
         
-        int r = js_random(0,3);
+        #ifdef WASM
+            int r = js_random(0,3);
+        #else
+            int r = random(0,3);
+        #endif
         Direction direction = Direction( pow( 2, r ) );
         
         // get neighboring room
@@ -224,8 +233,11 @@ void MazeGenerator::GenerateStep()
         uint room = 0;
 
         do{
-
-            room = js_random(1, width*height);
+            #ifdef WASM
+                room = js_random(1, width*height);
+            #else
+                room = random(1, width*height);
+            #endif
             exit = room;
 
         }while(room == 0 || 
@@ -236,8 +248,11 @@ void MazeGenerator::GenerateStep()
 
         // randomly place entrance over a dead end room
         do{
-
-            room = js_random(1, width*height);
+            #ifdef WASM
+                room = js_random(1, width*height);
+            #else
+                room = random(1, width*height);
+            #endif
             entry = room;
             
         }while(room == 0 || 
@@ -266,7 +281,11 @@ string MazeGenerator::toString()
 
             if(i == room_cursor)
             {
-                os << "<a class=\"blink\">☻</a>";
+                #ifdef WASM
+                    os << "<b class=\"blink\">☻</b>";
+                #else
+                    os << "☻";
+                #endif
             }
             else
             {
@@ -275,8 +294,11 @@ string MazeGenerator::toString()
             i++;
 
         }
-
-        os << "<br>";
+        #ifdef WASM
+            os << "<br>";
+        #else
+            os << endl;
+        #endif
 
     }
     return os.str();

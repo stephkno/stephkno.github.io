@@ -41,13 +41,20 @@ MazeSolver::~MazeSolver()
 void MazeSolver::SetMaze(DisjointSet<uint> & mazeSet, uint width, uint height, uint entry, uint exit)
 {
 
-    this->mazeSet = DisjointSet<uint>(mazeSet);
+    this->mazeSet = mazeSet;
     this->width = width;
     this->height = height;
     this->entry = entry;
     this->exit = exit;
     this->current_room = this->entry;
     this->n_steps = 0;
+
+    this->solved = false;
+    this->pathed = false;
+
+    visited.clear();
+    path.clear();
+    parents.clear();
 
     room_queue.Enqueue(this->entry);
 
@@ -169,8 +176,8 @@ uint MazeSolver::RoomsVisited()
 
 string MazeSolver::toString()
 {
-    stringstream os;
 
+    stringstream os;
     uint i = 0;
     
     for(uint y = 0; y < height; y++)
@@ -181,33 +188,50 @@ string MazeSolver::toString()
 
             if(i == current_room)
             {
-                os << "<b class=\"blink\">☻</b>";
+                #ifdef WASM
+                    os << "<b class=\"blink\">☻</b>";
+                #else
+                    os << "☻";
+                #endif
             }
             else if(i == entry)
             {
-                os << "<b class=\"blink\">S</b>";
+                #ifdef WASM
+                    os << "<b class=\"blink\">S</b>";
+                #else
+                    os << "S";
+                #endif
             }
             else if(i == exit)
             {
-                os << "<b class=\"blink\">E</b>";
+                #ifdef WASM
+                    os << "<b class=\"blink\">E</b>";
+                #else
+                    os << "E";
+                #endif
             }
             else if(!visited[i])
             {
                 os << thinMazewalls[mazeSet[i]];
             }
-            else if(find(path.begin(), path.end(), i) != path.end()){
+            else if(find(path.begin(), path.end(), i) != path.end())
+            {
                 os << mazeWalls[mazeSet[i]];
             }
             else
             {
                 os << thickMazewalls[mazeSet[i]];
             }
+            
             i++;
 
         }
 
-        os << "<br>";
-
+        #ifdef WASM
+            os << "<br>";
+        #else
+            os << endl;
+        #endif
     }
     return os.str();
 

@@ -30,8 +30,12 @@
             {
 
             }
+
+            ~Node()
+            {
+            }
         
-            Node & operator =(Node & other)
+            Node & operator =(const Node & other)
             {
                 value = other.value;
                 return *this;
@@ -85,7 +89,10 @@
 
     public:
 
-        DisjointSet(){}
+        DisjointSet()
+        {
+
+        }
         
         ~DisjointSet()
         {
@@ -106,15 +113,17 @@
         }
         
         // remove all subsets
-        void Clear()
+        void clear()
         {
             sets.clear();
         }
         
         // create new disjoint set with n nodes
         void NewSubset(uint n)
-        {
-            
+        {   
+
+            clear();
+
             for(uint i = 0; i < n; i++)
             {
                 Node * newNode = new Node(15);
