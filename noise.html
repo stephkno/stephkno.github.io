@@ -1,0 +1,144 @@
+<html>
+
+    <style>
+        
+        .slidecontainer{
+            width:100%
+        }
+        .slider{
+            width:95%
+        }
+        .start{
+            height: 100px;
+            width: 400px;
+            border-radius: 20px;
+        }
+
+    </style>
+
+    <button class="start" onclick="start()">Start</button>
+    <div class="slidecontainer">
+        <p>Brown <input type="range" min="100" max="10000" value="800" class="slider" id="brownslider"></p>
+        <p>Pink <input type="range" min="100" max="10000" value="800" class="slider" id="pinkslider"></p>
+    </div>
+
+    <script>
+        const noiseDuration = 32.0;
+
+        const audioCtx = new AudioContext();
+        const bufferSize = audioCtx.sampleRate * noiseDuration;
+
+        function generatePinkNoiseBuffer(bufferSize, audioContext) {
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+            
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                
+                // Updated state based on the previous value and the new white noise
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                const pink = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                b6 = white * 0.115926;
+
+                data[i] = pink * 0.11; // Scale down to avoid clipping
+            }
+            return buffer;
+        }
+
+        function generateBrownNoiseBuffer(bufferSize, audioContext) {
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            var sum = 0.0;
+
+            for (let i = 0; i < bufferSize; i++) {
+
+                let white = Math.random() * 2 - 1;
+                sum = (sum + (0.02 * white)) / 1.02;
+                data[i] = sum * 3.5;
+
+            }
+
+            return buffer;
+        }
+
+        function generateWhiteNoiseBuffer(bufferSize, audioContext) {
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            return buffer;
+        }
+
+        // Create an empty buffer
+        const noiseBuffer = new AudioBuffer({
+            length: bufferSize,
+            sampleRate: audioCtx.sampleRate,
+        });
+        
+        // Fill the buffer with noise
+        var sum = 0.0;
+
+        // Filter the output
+        const filter1 = new BiquadFilterNode(audioCtx, {
+            type: "lowpass",
+            frequency: 800.0,
+            Q: 0.0,
+        });
+        const filter2 = new BiquadFilterNode(audioCtx, {
+            type: "lowpass",
+            frequency: 2000.0,
+            Q: 0.0,
+        });
+
+        // Create a buffer source for our created data
+        const brownNoise = new AudioBufferSourceNode(audioCtx, {
+            buffer: generateBrownNoiseBuffer(bufferSize, audioCtx),
+        });
+        const pinkNoise = new AudioBufferSourceNode(audioCtx, {
+            buffer: generatePinkNoiseBuffer(bufferSize, audioCtx),
+        });
+
+        function start(){
+
+            const gain1 = audioCtx.createGain();
+            const gain2 = audioCtx.createGain();
+
+            gain2.gain.value = 0.5;
+
+            brownNoise.connect(gain1).connect(filter1).connect(audioCtx.destination);
+            pinkNoise.connect(gain2).connect(filter2).connect(audioCtx.destination);
+
+            brownNoise.loop = true;
+            pinkNoise.loop = true;
+
+            brownNoise.start();
+            pinkNoise.start();
+            
+        }
+
+        var brownslider = document.getElementById("brownslider");
+        var pinkslider = document.getElementById("pinkslider");
+
+        // Update the current slider value (each time you drag the slider handle)
+        brownslider.oninput = function() {
+            filter1.frequency.value = this.value;
+        } 
+        pinkslider.oninput = function() {
+            filter2.frequency.value = this.value;
+        }
+
+    </script>
+
+
+</html>
