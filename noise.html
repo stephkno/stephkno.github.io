@@ -184,11 +184,21 @@
                 }
             }
         });
+        
+        const createSilentAudio = () => {
+            const audio = new Audio();
+            // Very short silent audio data URI
+            audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMaAjSH0/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMaAjSH0/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMaAjSH0/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMaAjSH0/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMaAjSH0/LNeSsF';
+            audio.loop = true;
+            audio.volume = 0.01; // Very quiet but not completely silent
+            return audio;
+        };
+        const silentAudio = createSilentAudio();
+                
         document.addEventListener('touchstart', () => {
-            // Hack for iOS 15, which suspends audio when app is in background,
-            // and mutes audio when there is an incoming call.
-            audioCtx.resume();
-        })
+            silentAudio.play();
+        }, { once: true });
+
         
 
     </script>
