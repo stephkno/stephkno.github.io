@@ -184,6 +184,11 @@
                 }
             }
         });
+        document.addEventListener('touchstart', () => {
+            // Hack for iOS 15, which suspends audio when app is in background,
+            // and mutes audio when there is an incoming call.
+            audioCtx.resume();
+        })
         
 
     </script>
