@@ -179,6 +179,9 @@
                 }
             }else if(document.visibilityState === 'visible'){
                 console.log("Foreground");
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
             }
         });
         
