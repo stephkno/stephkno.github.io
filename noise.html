@@ -48,6 +48,8 @@
     </div>
 
     <script>
+        var started = false;
+        
         const noiseDuration = 32.0;
 
         const audioCtx = new AudioContext();
@@ -136,6 +138,10 @@
 
         function start(){
 
+            if(started){
+                return;
+            }
+
             const gain1 = audioCtx.createGain();
             const gain2 = audioCtx.createGain();
 
@@ -149,7 +155,8 @@
 
             brownNoise.start();
             pinkNoise.start();
-            
+            started = true;
+
         }
 
         var brownslider = document.getElementById("brownslider");
@@ -162,6 +169,19 @@
         pinkslider.oninput = function() {
             filter2.frequency.value = this.value;
         }
+        
+        document.addEventListener('visibility-change', function(){
+            if(document.visibilityState === 'hidden'){
+                console.log("Background");
+                // resume playing
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }else if(document.visibilityState === 'visible'){
+                console.log("Foreground");
+            }
+        });
+        
 
     </script>
 
