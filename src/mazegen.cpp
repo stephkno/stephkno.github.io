@@ -180,7 +180,7 @@ void MazeGenerator::GenerateStep()
 
         }
         
-        // remove down walls connecting room and neighbor room
+        // remove walls connecting room and neighbor room
         switch(direction)
         {
 
