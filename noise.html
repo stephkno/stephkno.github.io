@@ -43,8 +43,8 @@
 
     <button class="start" onclick="start()">Start</button>
     <div class="slidecontainer">
-        <p>Brown <input type="range" min="100" max="10000" value="800" class="slider" id="brownslider"></p>
-        <p>Pink <input type="range" min="100" max="10000" value="800" class="slider" id="pinkslider"></p>
+        <p>Brown <input type="range" min="10" max="1000" value="400" class="slider" id="brownslider"></p>
+        <p>Pink <input type="range" min="10" max="1000" value="800" class="slider" id="pinkslider"></p>
     </div>
 
     <script>
@@ -119,12 +119,12 @@
         // Filter the output
         const filter1 = new BiquadFilterNode(audioCtx, {
             type: "lowpass",
-            frequency: 800.0,
+            frequency: 400.0,
             Q: 0.0,
         });
         const filter2 = new BiquadFilterNode(audioCtx, {
             type: "lowpass",
-            frequency: 2000.0,
+            frequency: 800.0,
             Q: 0.0,
         });
 
