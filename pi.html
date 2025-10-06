@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi Digits Musical Player</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        #playBtn {
+            background: #667eea;
+            color: white;
+        }
+        #playBtn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        #stopBtn {
+            background: #f093fb;
+            color: white;
+        }
+        #stopBtn:hover {
+            background: #d878e3;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .settings {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        label {
+            color: #333;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        .value-display {
+            min-width: 60px;
+            text-align: right;
+            color: #667eea;
+            font-weight: bold;
+        }
+        #piDisplay {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            line-height: 1.8;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .current-digit {
+            background: #667eea;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .scale-info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #555;
+        }
+        .scale-info strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>π Musical Player</h1>
+        <div class="subtitle">Playing the digits of pi in a decatonic scale</div>
+        
+        <div class="controls">
+            <button id="playBtn">▶ Play Pi</button>
+            <button id="stopBtn" disabled>⏹ Stop</button>
+        </div>
+
+        <div class="settings">
+            <div class="setting-row">
+                <label for="tempo">Tempo (BPM):</label>
+                <input type="range" id="tempo" min="60" max="300" value="120">
+                <span class="value-display" id="tempoVal">120</span>
+            </div>
+            <div class="setting-row">
+                <label for="digits">Digits to Play:</label>
+                <input type="range" id="digits" min="10" max="200" value="50">
+                <span class="value-display" id="digitsVal">50</span>
+            </div>
+        </div>
+
+        <div id="piDisplay"></div>
+
+        <div class="scale-info">
+            <strong>Decatonic Scale Mapping:</strong><br>
+            Each digit (0-9) maps to a note in a 10-note scale spanning an octave.<br>
+            Scale: C, D, E, F, G, A, Bb, B, C#, D#
+        </div>
+    </div>
+
+    <script>
+        const piDigits = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679";
+        
+        // Decatonic scale (10 notes) - frequencies in Hz
+        const decatonicScale = [
+            261.63, // C4 - digit 0
+            293.66, // D4 - digit 1
+            329.63, // E4 - digit 2
+            349.23, // F4 - digit 3
+            392.00, // G4 - digit 4
+            440.00, // A4 - digit 5
+            466.16, // Bb4 - digit 6
+            493.88, // B4 - digit 7
+            554.37, // C#5 - digit 8
+            622.25  // D#5 - digit 9
+        ];
+
+        let audioContext;
+        let isPlaying = false;
+        let currentIndex = 0;
+        let timeoutId;
+
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const tempoInput = document.getElementById('tempo');
+        const tempoVal = document.getElementById('tempoVal');
+        const digitsInput = document.getElementById('digits');
+        const digitsVal = document.getElementById('digitsVal');
+        const piDisplay = document.getElementById('piDisplay');
+
+        // Update display values
+        tempoInput.addEventListener('input', () => {
+            tempoVal.textContent = tempoInput.value;
+        });
+
+        digitsInput.addEventListener('input', () => {
+            digitsVal.textContent = digitsInput.value;
+            updatePiDisplay();
+        });
+
+        function updatePiDisplay() {
+            const numDigits = parseInt(digitsInput.value);
+            const digits = piDigits.slice(0, numDigits);
+            piDisplay.innerHTML = digits.split('').map((d, i) => {
+                if (i === currentIndex && isPlaying) {
+                    return `<span class="current-digit">${d}</span>`;
+                }
+                return d;
+            }).join('');
+        }
+
+        function playNote(frequency, duration) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            const osc = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            osc.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            osc.frequency.value = frequency;
+            osc.type = 'sine';
+
+            // Envelope for smoother sound
+            const now = audioContext.currentTime;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0, now + duration);
+
+            osc.start(now);
+            osc.stop(now + duration);
+        }
+
+        function playSequence() {
+            if (!isPlaying) return;
+
+            const numDigits = parseInt(digitsInput.value);
+            const tempo = parseInt(tempoInput.value);
+            const noteDuration = 60 / tempo; // Duration in seconds
+
+            if (currentIndex >= numDigits) {
+                stopPlaying();
+                return;
+            }
+
+            const digit = parseInt(piDigits[currentIndex]);
+            const frequency = decatonicScale[digit];
+
+            playNote(frequency, noteDuration * 0.8);
+            updatePiDisplay();
+
+            currentIndex++;
+            timeoutId = setTimeout(playSequence, noteDuration * 1000);
+        }
+
+        function startPlaying() {
+            isPlaying = true;
+            currentIndex = 0;
+            playBtn.disabled = true;
+            stopBtn.disabled = false;
+            tempoInput.disabled = true;
+            digitsInput.disabled = true;
+            playSequence();
+        }
+
+        function stopPlaying() {
+            isPlaying = false;
+            clearTimeout(timeoutId);
+            playBtn.disabled = false;
+            stopBtn.disabled = true;
+            tempoInput.disabled = false;
+            digitsInput.disabled = false;
+            currentIndex = 0;
+            updatePiDisplay();
+        }
+
+        playBtn.addEventListener('click', startPlaying);
+        stopBtn.addEventListener('click', stopPlaying);
+
+        // Initial display
+        updatePiDisplay();
+    </script>
+</body>
+</html>
