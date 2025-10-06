@@ -82,15 +82,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 15px;
         }
         label {
             color: #333;
             font-weight: bold;
+            min-width: 100px;
         }
         input[type="range"] {
-            width: 200px;
+            flex: 1;
+            max-width: 200px;
         }
         select {
+            flex: 1;
             padding: 8px 12px;
             border: 2px solid #667eea;
             border-radius: 8px;
@@ -143,7 +147,7 @@
 <body>
     <div class="container">
         <h1>π Musical Player</h1>
-        <div class="subtitle">Playing the digits of pi in a decatonic scale</div>
+        <div class="subtitle">Playing the digits of pi in musical scales</div>
         
         <div class="controls">
             <button id="playBtn">▶ Play Pi</button>
@@ -152,13 +156,35 @@
 
         <div class="settings">
             <div class="setting-row">
-                <label for="scale">Scale Type:</label>
+                <label for="scale">Scale:</label>
                 <select id="scale">
-                    <option value="8">Octatonic (8 notes)</option>
-                    <option value="9">Nonatonic (9 notes)</option>
-                    <option value="10" selected>Decatonic (10 notes)</option>
-                    <option value="11">Undecatonic (11 notes)</option>
-                    <option value="12">Dodecatonic (12 notes)</option>
+                    <option value="C_major">C Major</option>
+                    <option value="C_minor">C Minor</option>
+                    <option value="D_major">D Major</option>
+                    <option value="D_minor">D Minor</option>
+                    <option value="E_major">E Major</option>
+                    <option value="E_minor">E Minor</option>
+                    <option value="F_major">F Major</option>
+                    <option value="F_minor">F Minor</option>
+                    <option value="G_major">G Major</option>
+                    <option value="G_minor">G Minor</option>
+                    <option value="A_major">A Major</option>
+                    <option value="A_minor">A Minor</option>
+                    <option value="B_major">B Major</option>
+                    <option value="B_minor">B Minor</option>
+                    <option value="chromatic">Chromatic</option>
+                    <option value="pentatonic_major">Pentatonic Major</option>
+                    <option value="pentatonic_minor">Pentatonic Minor</option>
+                    <option value="blues">Blues</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label for="timbre">Timbre:</label>
+                <select id="timbre">
+                    <option value="sine">Sine (Pure)</option>
+                    <option value="triangle">Triangle (Soft)</option>
+                    <option value="square">Square (Harsh)</option>
+                    <option value="sawtooth">Sawtooth (Bright)</option>
                 </select>
             </div>
             <div class="setting-row">
@@ -176,40 +202,105 @@
         <div id="piDisplay"></div>
 
         <div class="scale-info">
-            <strong>Current Scale Mapping:</strong><br>
-            <span id="scaleDescription">Each digit (0-9) maps to a note in a 10-note scale.</span>
+            <strong>Current Scale:</strong><br>
+            <span id="scaleDescription"></span>
         </div>
     </div>
 
     <script>
         const piDigits = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679";
         
-        // Different scale options (all start from C4)
+        // Musical scales - frequencies in Hz for each note
         const scales = {
-            8: { // Octatonic (diminished scale)
-                name: "Octatonic",
-                notes: ["C", "D", "Eb", "F", "Gb", "Ab", "A", "B"],
-                frequencies: [261.63, 293.66, 311.13, 349.23, 369.99, 415.30, 440.00, 493.88]
+            C_major: {
+                name: "C Major",
+                notes: ["C", "D", "E", "F", "G", "A", "B", "C5"],
+                frequencies: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25]
             },
-            9: { // Nonatonic
-                name: "Nonatonic",
-                notes: ["C", "D", "E", "F", "G", "A", "Bb", "B", "C#"],
-                frequencies: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 466.16, 493.88, 554.37]
+            C_minor: {
+                name: "C Minor",
+                notes: ["C", "D", "Eb", "F", "G", "Ab", "Bb", "C5"],
+                frequencies: [261.63, 293.66, 311.13, 349.23, 392.00, 415.30, 466.16, 523.25, 587.33, 622.25]
             },
-            10: { // Decatonic
-                name: "Decatonic",
-                notes: ["C", "D", "E", "F", "G", "A", "Bb", "B", "C#", "D#"],
-                frequencies: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 466.16, 493.88, 554.37, 622.25]
+            D_major: {
+                name: "D Major",
+                notes: ["D", "E", "F#", "G", "A", "B", "C#5", "D5"],
+                frequencies: [293.66, 329.63, 369.99, 392.00, 440.00, 493.88, 554.37, 587.33, 659.25, 739.99]
             },
-            11: { // Undecatonic
-                name: "Undecatonic",
-                notes: ["C", "C#", "D", "E", "F", "F#", "G", "A", "Bb", "B", "C5"],
-                frequencies: [261.63, 277.18, 293.66, 329.63, 349.23, 369.99, 392.00, 440.00, 466.16, 493.88, 523.25]
+            D_minor: {
+                name: "D Minor",
+                notes: ["D", "E", "F", "G", "A", "Bb", "C5", "D5"],
+                frequencies: [293.66, 329.63, 349.23, 392.00, 440.00, 466.16, 523.25, 587.33, 659.25, 698.46]
             },
-            12: { // Dodecatonic (chromatic)
-                name: "Dodecatonic (Chromatic)",
-                notes: ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
-                frequencies: [261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88]
+            E_major: {
+                name: "E Major",
+                notes: ["E", "F#", "G#", "A", "B", "C#5", "D#5", "E5"],
+                frequencies: [329.63, 369.99, 415.30, 440.00, 493.88, 554.37, 622.25, 659.25, 739.99, 830.61]
+            },
+            E_minor: {
+                name: "E Minor",
+                notes: ["E", "F#", "G", "A", "B", "C5", "D5", "E5"],
+                frequencies: [329.63, 369.99, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 739.99, 783.99]
+            },
+            F_major: {
+                name: "F Major",
+                notes: ["F", "G", "A", "Bb", "C5", "D5", "E5", "F5"],
+                frequencies: [349.23, 392.00, 440.00, 466.16, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00]
+            },
+            F_minor: {
+                name: "F Minor",
+                notes: ["F", "G", "Ab", "Bb", "C5", "Db5", "Eb5", "F5"],
+                frequencies: [349.23, 392.00, 415.30, 466.16, 523.25, 554.37, 622.25, 698.46, 783.99, 830.61]
+            },
+            G_major: {
+                name: "G Major",
+                notes: ["G", "A", "B", "C5", "D5", "E5", "F#5", "G5"],
+                frequencies: [392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 739.99, 783.99, 880.00, 987.77]
+            },
+            G_minor: {
+                name: "G Minor",
+                notes: ["G", "A", "Bb", "C5", "D5", "Eb5", "F5", "G5"],
+                frequencies: [392.00, 440.00, 466.16, 523.25, 587.33, 622.25, 698.46, 783.99, 880.00, 932.33]
+            },
+            A_major: {
+                name: "A Major",
+                notes: ["A", "B", "C#5", "D5", "E5", "F#5", "G#5", "A5"],
+                frequencies: [440.00, 493.88, 554.37, 587.33, 659.25, 739.99, 830.61, 880.00, 987.77, 1108.73]
+            },
+            A_minor: {
+                name: "A Minor",
+                notes: ["A", "B", "C5", "D5", "E5", "F5", "G5", "A5"],
+                frequencies: [440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50]
+            },
+            B_major: {
+                name: "B Major",
+                notes: ["B", "C#5", "D#5", "E5", "F#5", "G#5", "A#5", "B5"],
+                frequencies: [493.88, 554.37, 622.25, 659.25, 739.99, 830.61, 932.33, 987.77, 1108.73, 1244.51]
+            },
+            B_minor: {
+                name: "B Minor",
+                notes: ["B", "C#5", "D5", "E5", "F#5", "G5", "A5", "B5"],
+                frequencies: [493.88, 554.37, 587.33, 659.25, 739.99, 783.99, 880.00, 987.77, 1108.73, 1174.66]
+            },
+            chromatic: {
+                name: "Chromatic",
+                notes: ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A"],
+                frequencies: [261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00]
+            },
+            pentatonic_major: {
+                name: "Pentatonic Major",
+                notes: ["C", "D", "E", "G", "A", "C5"],
+                frequencies: [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00]
+            },
+            pentatonic_minor: {
+                name: "Pentatonic Minor",
+                notes: ["A", "C5", "D5", "E5", "G5", "A5"],
+                frequencies: [440.00, 523.25, 587.33, 659.25, 783.99, 880.00, 1046.50, 1174.66, 1318.51, 1567.98]
+            },
+            blues: {
+                name: "Blues",
+                notes: ["C", "Eb", "F", "F#", "G", "Bb", "C5"],
+                frequencies: [261.63, 311.13, 349.23, 369.99, 392.00, 466.16, 523.25, 622.25, 698.46, 739.99]
             }
         };
 
@@ -221,6 +312,7 @@
         const playBtn = document.getElementById('playBtn');
         const stopBtn = document.getElementById('stopBtn');
         const scaleSelect = document.getElementById('scale');
+        const timbreSelect = document.getElementById('timbre');
         const tempoInput = document.getElementById('tempo');
         const tempoVal = document.getElementById('tempoVal');
         const digitsInput = document.getElementById('digits');
@@ -230,9 +322,9 @@
 
         // Update scale description
         function updateScaleDescription() {
-            const scaleType = parseInt(scaleSelect.value);
+            const scaleType = scaleSelect.value;
             const scale = scales[scaleType];
-            scaleDescription.innerHTML = `${scale.name} Scale (${scaleType} notes): ${scale.notes.join(', ')}<br>Digits are mapped modulo ${scaleType} when scale has fewer than 10 notes.`;
+            scaleDescription.innerHTML = `${scale.name}: ${scale.notes.join(' - ')}<br>Each digit (0-9) maps to a note in the scale.`;
         }
 
         // Update display values
@@ -258,7 +350,7 @@
             }).join('');
         }
 
-        function playNote(frequency, duration) {
+        function playNote(frequency, duration, waveType) {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
@@ -270,7 +362,7 @@
             gainNode.connect(audioContext.destination);
 
             osc.frequency.value = frequency;
-            osc.type = 'sine';
+            osc.type = waveType;
 
             // Envelope for smoother sound
             const now = audioContext.currentTime;
@@ -287,9 +379,10 @@
 
             const numDigits = parseInt(digitsInput.value);
             const tempo = parseInt(tempoInput.value);
-            const scaleType = parseInt(scaleSelect.value);
+            const scaleType = scaleSelect.value;
+            const waveType = timbreSelect.value;
             const scale = scales[scaleType];
-            const noteDuration = 60 / tempo; // Duration in seconds
+            const noteDuration = 60 / tempo;
 
             if (currentIndex >= numDigits) {
                 stopPlaying();
@@ -297,11 +390,9 @@
             }
 
             const digit = parseInt(piDigits[currentIndex]);
-            // Map digit to scale (use modulo for scales with fewer than 10 notes)
-            const noteIndex = digit % scaleType;
-            const frequency = scale.frequencies[noteIndex];
+            const frequency = scale.frequencies[digit];
 
-            playNote(frequency, noteDuration * 0.8);
+            playNote(frequency, noteDuration * 0.8, waveType);
             updatePiDisplay();
 
             currentIndex++;
@@ -316,6 +407,7 @@
             tempoInput.disabled = true;
             digitsInput.disabled = true;
             scaleSelect.disabled = true;
+            timbreSelect.disabled = true;
             playSequence();
         }
 
@@ -327,6 +419,7 @@
             tempoInput.disabled = false;
             digitsInput.disabled = false;
             scaleSelect.disabled = false;
+            timbreSelect.disabled = false;
             currentIndex = 0;
             updatePiDisplay();
         }
