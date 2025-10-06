@@ -90,6 +90,20 @@
         input[type="range"] {
             width: 200px;
         }
+        select {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        select:focus {
+            outline: none;
+            border-color: #5568d3;
+        }
         .value-display {
             min-width: 60px;
             text-align: right;
@@ -138,6 +152,16 @@
 
         <div class="settings">
             <div class="setting-row">
+                <label for="scale">Scale Type:</label>
+                <select id="scale">
+                    <option value="8">Octatonic (8 notes)</option>
+                    <option value="9">Nonatonic (9 notes)</option>
+                    <option value="10" selected>Decatonic (10 notes)</option>
+                    <option value="11">Undecatonic (11 notes)</option>
+                    <option value="12">Dodecatonic (12 notes)</option>
+                </select>
+            </div>
+            <div class="setting-row">
                 <label for="tempo">Tempo (BPM):</label>
                 <input type="range" id="tempo" min="60" max="300" value="120">
                 <span class="value-display" id="tempoVal">120</span>
@@ -152,28 +176,42 @@
         <div id="piDisplay"></div>
 
         <div class="scale-info">
-            <strong>Decatonic Scale Mapping:</strong><br>
-            Each digit (0-9) maps to a note in a 10-note scale spanning an octave.<br>
-            Scale: C, D, E, F, G, A, Bb, B, C#, D#
+            <strong>Current Scale Mapping:</strong><br>
+            <span id="scaleDescription">Each digit (0-9) maps to a note in a 10-note scale.</span>
         </div>
     </div>
 
     <script>
         const piDigits = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679";
         
-        // Decatonic scale (10 notes) - frequencies in Hz
-        const decatonicScale = [
-            261.63, // C4 - digit 0
-            293.66, // D4 - digit 1
-            329.63, // E4 - digit 2
-            349.23, // F4 - digit 3
-            392.00, // G4 - digit 4
-            440.00, // A4 - digit 5
-            466.16, // Bb4 - digit 6
-            493.88, // B4 - digit 7
-            554.37, // C#5 - digit 8
-            622.25  // D#5 - digit 9
-        ];
+        // Different scale options (all start from C4)
+        const scales = {
+            8: { // Octatonic (diminished scale)
+                name: "Octatonic",
+                notes: ["C", "D", "Eb", "F", "Gb", "Ab", "A", "B"],
+                frequencies: [261.63, 293.66, 311.13, 349.23, 369.99, 415.30, 440.00, 493.88]
+            },
+            9: { // Nonatonic
+                name: "Nonatonic",
+                notes: ["C", "D", "E", "F", "G", "A", "Bb", "B", "C#"],
+                frequencies: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 466.16, 493.88, 554.37]
+            },
+            10: { // Decatonic
+                name: "Decatonic",
+                notes: ["C", "D", "E", "F", "G", "A", "Bb", "B", "C#", "D#"],
+                frequencies: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 466.16, 493.88, 554.37, 622.25]
+            },
+            11: { // Undecatonic
+                name: "Undecatonic",
+                notes: ["C", "C#", "D", "E", "F", "F#", "G", "A", "Bb", "B", "C5"],
+                frequencies: [261.63, 277.18, 293.66, 329.63, 349.23, 369.99, 392.00, 440.00, 466.16, 493.88, 523.25]
+            },
+            12: { // Dodecatonic (chromatic)
+                name: "Dodecatonic (Chromatic)",
+                notes: ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+                frequencies: [261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88]
+            }
+        };
 
         let audioContext;
         let isPlaying = false;
@@ -182,13 +220,24 @@
 
         const playBtn = document.getElementById('playBtn');
         const stopBtn = document.getElementById('stopBtn');
+        const scaleSelect = document.getElementById('scale');
         const tempoInput = document.getElementById('tempo');
         const tempoVal = document.getElementById('tempoVal');
         const digitsInput = document.getElementById('digits');
         const digitsVal = document.getElementById('digitsVal');
         const piDisplay = document.getElementById('piDisplay');
+        const scaleDescription = document.getElementById('scaleDescription');
+
+        // Update scale description
+        function updateScaleDescription() {
+            const scaleType = parseInt(scaleSelect.value);
+            const scale = scales[scaleType];
+            scaleDescription.innerHTML = `${scale.name} Scale (${scaleType} notes): ${scale.notes.join(', ')}<br>Digits are mapped modulo ${scaleType} when scale has fewer than 10 notes.`;
+        }
 
         // Update display values
+        scaleSelect.addEventListener('change', updateScaleDescription);
+        
         tempoInput.addEventListener('input', () => {
             tempoVal.textContent = tempoInput.value;
         });
@@ -238,6 +287,8 @@
 
             const numDigits = parseInt(digitsInput.value);
             const tempo = parseInt(tempoInput.value);
+            const scaleType = parseInt(scaleSelect.value);
+            const scale = scales[scaleType];
             const noteDuration = 60 / tempo; // Duration in seconds
 
             if (currentIndex >= numDigits) {
@@ -246,7 +297,9 @@
             }
 
             const digit = parseInt(piDigits[currentIndex]);
-            const frequency = decatonicScale[digit];
+            // Map digit to scale (use modulo for scales with fewer than 10 notes)
+            const noteIndex = digit % scaleType;
+            const frequency = scale.frequencies[noteIndex];
 
             playNote(frequency, noteDuration * 0.8);
             updatePiDisplay();
@@ -262,6 +315,7 @@
             stopBtn.disabled = false;
             tempoInput.disabled = true;
             digitsInput.disabled = true;
+            scaleSelect.disabled = true;
             playSequence();
         }
 
@@ -272,6 +326,7 @@
             stopBtn.disabled = true;
             tempoInput.disabled = false;
             digitsInput.disabled = false;
+            scaleSelect.disabled = false;
             currentIndex = 0;
             updatePiDisplay();
         }
@@ -280,6 +335,7 @@
         stopBtn.addEventListener('click', stopPlaying);
 
         // Initial display
+        updateScaleDescription();
         updatePiDisplay();
     </script>
 </body>
