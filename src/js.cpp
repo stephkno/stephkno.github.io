@@ -10,7 +10,6 @@ void PutString(const std::string& newText) {
     }, newText.c_str());
 }
 
-// Function to change the text of the div
 void alert(const std::string& newText) {
     EM_ASM({
         alert(UTF8ToString($0));
