@@ -401,7 +401,7 @@
 
         function updateFrequencies() {
             if (leftOscillator && rightOscillator) {
-                const baseFreq = 200;
+                const baseFreq = 440;
                 leftOscillator.frequency.value = baseFreq;
                 rightOscillator.frequency.value = baseFreq + currentFreq;
             }
